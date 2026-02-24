@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Property Animation - Problem vs Lösung</title>
+  <style>
+
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      --color-health-bad: #e74c3c;
+      --color-health-good: #2ecc71;
+      --color-bar-background: #ddd;
+      --bar-width: 200px;
+      --bar-height: 30px;
+    }
+
+    .health-bar-container {
+      width: var(--bar-width);
+      height: var(--bar-height);
+      background-color: var(--color-bar-background);
+      border-radius: 5px;
+    }
+
+    .health-bar-bad {
+      height: var(--bar-height);
+      width: var(--bar-width);
+      background-color: var(--color-health-bad);
+      border-radius: 5px;
+      /*  kein smooth Übergang - direkte Änderung per JS */
+    }
+
+    /* ===== @property DEFINITION ===== */
+    @property --health-good {
+      syntax: "<number>";  /* Browser kennt jetzt den Typ */
+      initial-value: 100;
+      inherits: false;
+    }
+
+    .health-bar-good {
+      --health-good: 100;
+      height: var(--bar-height);
+      width: calc(var(--health-good) * 2px);
+      background-color: var(--color-health-good);
+      border-radius: 5px;
+      /* Browser kennt den Typ → smooth Übergang */
+      transition: --health-good 0.5s;
+    }
+
+    .wrapper {
+      display: flex;
+      gap: 40px;
+      padding: 40px;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    h2 {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="column">
+    <h2> Ohne @property</h2>
+    <div class="health-bar-container">
+      <div class="health-bar-bad" id="health-bad"></div>
+    </div>
+    <button onclick="reduceHealthBad()">Schaden nehmen</button>
+  </div>
+
+  <div class="column">
+    <h2> Mit @property</h2>
+    <div class="health-bar-container">
+      <div class="health-bar-good" id="health-good"></div>
+    </div>
+    <button onclick="reduceHealthGood()">Schaden nehmen</button>
+  </div>
+
+</div>
+
+<script>
+  let healthBad = 100;
+  let healthGood = 100;
+
+  function reduceHealthBad() {
+    healthBad = Math.max(0, healthBad - 20);
+    document.getElementById('health-bad').style.width = (healthBad * 2) + 'px';
+  }
+
+  function reduceHealthGood() {
+    healthGood = Math.max(0, healthGood - 20);
+    document.getElementById('health-good').style.setProperty('--health-good', healthGood);
+  }
+</script>
+</body>
+</html>
